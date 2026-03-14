@@ -21,6 +21,29 @@
       --font: 'Syne', sans-serif;
     }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; }
+    @media (min-width: 768px) {
+      html, body { overflow: auto; }
+      #root { max-width: 100% !important; flex-direction: row !important; height: auto !important; min-height: 100vh; }
+      #install-banner { display: none !important; }
+      #topbar { width: 220px; min-width: 220px; flex-direction: column !important; align-items: flex-start !important; height: 100vh; position: sticky; top: 0; border-right: 0.5px solid var(--border); border-bottom: none !important; padding: 28px 20px !important; flex-shrink: 0; }
+      .app-logo { margin-bottom: 20px; }
+      .date-chip { margin-top: auto; }
+      #topbar h1 { font-size: 18px; }
+      #tabs { display: none !important; }
+      #sidebar-nav { display: flex !important; flex-direction: column; gap: 4px; width: 100%; }
+      .snav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 13px; color: var(--muted); transition: all 0.15s; }
+      .snav-item:hover { background: var(--surface2); color: var(--text); }
+      .snav-item.active { background: rgba(124,111,255,0.12); color: var(--purple); }
+      .snav-icon { font-size: 16px; width: 22px; }
+      #pages { flex: 1; overflow-y: auto; }
+      .page { max-width: 860px; padding: 28px 36px 40px !important; }
+      .stats-grid { grid-template-columns: repeat(4, 1fr) !important; }
+      #page-agent.active { display: flex !important; flex-direction: column; height: 100vh; max-width: 100%; padding: 0 !important; }
+      #agent-msgs { padding: 20px 32px; }
+      #agent-chips { padding: 8px 32px; }
+      #agent-input-bar { padding: 12px 32px 20px; }
+      .abubble { max-width: 60%; }
+    }
     #root { height: 100vh; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
 
     /* Install banner */
@@ -162,6 +185,14 @@
     <div class="app-logo">
       <div class="app-icon">📚</div>
       <h1>StudyTrack</h1>
+    </div>
+    <div id="sidebar-nav" style="display:none">
+      <div class="snav-item active" onclick="switchTab('home')"><span class="snav-icon">🏠</span>Home</div>
+      <div class="snav-item" onclick="switchTab('dsa')"><span class="snav-icon">🧩</span>DSA</div>
+      <div class="snav-item" onclick="switchTab('web')"><span class="snav-icon">🌐</span>Web Dev</div>
+      <div class="snav-item" onclick="switchTab('tasks')"><span class="snav-icon">✅</span>Tasks</div>
+      <div class="snav-item" onclick="switchTab('exams')"><span class="snav-icon">📅</span>Exams</div>
+      <div class="snav-item" onclick="switchTab('agent')"><span class="snav-icon">🤖</span>AI Agent</div>
     </div>
     <div class="date-chip" id="date-chip"></div>
   </div>
@@ -535,10 +566,9 @@ function examHTML(e, showDel) {
 }
 
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['home','dsa','web','tasks','exams','agent'];
-    t.classList.toggle('active', names[i] === name);
-  });
+  const names = ['home','dsa','web','tasks','exams','agent'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
+  document.querySelectorAll('.snav-item').forEach((t,i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
 }
