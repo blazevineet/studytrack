@@ -4,48 +4,47 @@ export default async function handler(req, res) {
   const { messages } = req.body;
   if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: 'Invalid request' });
 
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) return res.status(500).json({ error: 'Gemini API key not configured' });
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_API_KEY) return res.status(500).json({ error: 'Groq API key not configured' });
 
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  const systemPrompt = `You are a helpful AI assistant in a student study tracker app called StudyTrack. Help with questions, DSA, web dev, study tips, and drafting emails. Be concise and friendly. Today: ${today}`;
-
-  const geminiContents = messages.map(msg => ({
-    role: msg.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: msg.content }]
-  }));
-
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: geminiContents,
-          generationConfig: { maxOutputTokens: 800, temperature: 0.7 }
-        })
-      }
-    );
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 800,
+        messages: [
+          {
+            role: 'system',
+            content: `You are a helpful AI assistant in a student study tracker app called StudyTrack. Help with questions, DSA problems, web dev topics, study tips, and drafting emails. Be concise, friendly, and mobile-friendly. Use bullet points where helpful. Today: ${today}`
+          },
+          ...messages
+        ]
+      })
+    });
 
-    let data;
     const text = await response.text();
+    let data;
     try {
       data = JSON.parse(text);
-    } catch (e) {
-      return res.status(500).json({ error: 'Invalid response from Gemini: ' + text.slice(0, 200) });
+    } catch(e) {
+      return res.status(500).json({ error: 'Invalid response: ' + text.slice(0, 200) });
     }
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: data.error?.message || 'Gemini API error' });
+      return res.status(response.status).json({ error: data.error?.message || 'Groq API error' });
     }
 
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!reply) return res.status(500).json({ error: 'No response from Gemini. Try again.' });
+    const reply = data.choices?.[0]?.message?.content;
+    if (!reply) return res.status(500).json({ error: 'No response received. Try again.' });
 
     return res.status(200).json({ reply });
 
