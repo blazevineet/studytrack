@@ -260,6 +260,49 @@
     .lc-ct{flex:1;text-align:center;font-size:11px;color:var(--mu);}
     .lc-ct strong{display:block;font-size:15px;font-weight:600;color:var(--tx);margin-bottom:2px;}
     .lc-last-sync{font-size:10px;color:var(--mu);text-align:right;padding:6px 16px;}
+
+    /* CALENDAR HEATMAP */
+    .heatmap-wrap{overflow-x:auto;padding:4px 0;}
+    .heatmap{display:flex;gap:3px;}
+    .heatmap-col{display:flex;flex-direction:column;gap:3px;}
+    .heatmap-cell{width:13px;height:13px;border-radius:3px;flex-shrink:0;}
+    .hm-0{background:var(--sur2);}
+    .hm-1{background:rgba(29,158,117,0.3);}
+    .hm-2{background:rgba(29,158,117,0.55);}
+    .hm-3{background:rgba(29,158,117,0.8);}
+    .hm-4{background:#1D9E75;}
+    .heatmap-months{display:flex;gap:3px;font-size:9px;color:var(--mu);margin-bottom:4px;padding-left:2px;}
+    .heatmap-legend{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mu);margin-top:6px;justify-content:flex-end;}
+    .heatmap-legend .heatmap-cell{width:10px;height:10px;}
+
+    /* TOPIC BAR CHART */
+    .topic-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+    .topic-bar-label{font-size:11px;color:var(--mu);width:100px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .topic-bar-track{flex:1;height:8px;border-radius:10px;background:var(--sur2);overflow:hidden;}
+    .topic-bar-fill{height:100%;border-radius:10px;background:var(--pu);transition:width 0.5s;}
+    .topic-bar-count{font-size:11px;color:var(--mu);width:24px;text-align:right;flex-shrink:0;}
+
+    /* CHALLENGE */
+    .ch-problem{background:var(--sur2);border:0.5px solid var(--b1);border-radius:14px;padding:16px;}
+    .ch-title{font-size:16px;font-weight:600;margin-bottom:6px;}
+    .ch-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+    .ch-pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
+    .ch-easy{background:rgba(29,158,117,0.15);color:var(--gr);}
+    .ch-medium{background:rgba(239,159,39,0.15);color:var(--am);}
+    .ch-hard{background:rgba(226,75,74,0.15);color:#ff6b6a;}
+    .ch-desc{font-size:13px;color:var(--mu);line-height:1.7;margin-bottom:14px;}
+    .ch-hint{background:rgba(124,111,255,0.08);border:0.5px solid rgba(124,111,255,0.2);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--mu);line-height:1.6;margin-bottom:14px;display:none;}
+    .ch-actions{display:flex;gap:8px;flex-wrap:wrap;}
+    .ch-btn{font-size:12px;padding:8px 16px;border-radius:10px;border:none;cursor:pointer;font-family:var(--fn);font-weight:500;}
+    .ch-solve{background:var(--gr);color:#fff;}
+    .ch-hint-btn{background:rgba(124,111,255,0.15);color:var(--pu);}
+    .ch-skip{background:var(--sur2);color:var(--mu);border:0.5px solid var(--b2);}
+    .ch-done{background:rgba(29,158,117,0.15);color:var(--gr);border:0.5px solid rgba(29,158,117,0.3);}
+    .ch-hist-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--sur2);border:0.5px solid var(--b1);margin-bottom:8px;}
+    .ch-hist-title{flex:1;font-size:13px;}
+    .ch-hist-date{font-size:10px;color:var(--mu);}
+    .ch-loading{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mu);padding:16px 0;}
+    .ch-xp{font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.1);padding:3px 10px;border-radius:20px;}
   </style>
 </head>
 <body>
@@ -342,6 +385,7 @@
       <div class="sni" onclick="go('stats')"><span class="sni-i">📊</span>Analytics</div>
       <div class="sni" onclick="go('achievements')"><span class="sni-i">🏆</span>Achievements</div>
       <div class="sni" onclick="go('leetcode')"><span class="sni-i">💻</span>LeetCode</div>
+      <div class="sni" onclick="go('challenge')"><span class="sni-i">🎯</span>Daily Challenge</div>
       <div class="sni" onclick="go('agent')"><span class="sni-i">🤖</span>AI Agent</div>
     </nav>
     <div class="sdate" id="sdate"></div>
@@ -519,6 +563,26 @@
         </div>
       </div>
 
+
+      <!-- DAILY CHALLENGE -->
+      <div class="page" id="page-challenge">
+        <div id="challenge-content">
+          <div class="card">
+            <div class="ch"><div class="dot" style="background:linear-gradient(135deg,#f59e0b,#ef4444)"></div>
+              <span class="ct">Daily Challenge</span>
+              <span class="sbadge" style="background:rgba(245,158,11,0.15);color:#f59e0b" id="ch-date"></span>
+            </div>
+            <div class="cbody" id="ch-body">
+              <div class="empty">Loading today's challenge...</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="ch"><div class="dot" style="background:var(--pu)"></div><span class="ct">Challenge History</span></div>
+            <div class="cbody" id="ch-history"><div class="empty">No challenges completed yet</div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- AGENT -->
       <div class="page" id="page-agent">
         <div id="ah">
@@ -562,6 +626,12 @@
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
         <div onclick="go('tasks');toggleMoreMenu()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 4px;border-radius:12px;cursor:pointer;background:var(--sur2);border:0.5px solid var(--b1);">
           <div style="font-size:22px">✅</div><span style="font-size:10px;color:var(--mu)">Tasks</span>
+        </div>
+        <div onclick="go('leetcode');toggleMoreMenu()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 4px;border-radius:12px;cursor:pointer;background:var(--sur2);border:0.5px solid var(--b1);">
+          <div style="font-size:22px">💻</div><span style="font-size:10px;color:var(--mu)">LeetCode</span>
+        </div>
+        <div onclick="go('challenge');toggleMoreMenu()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 4px;border-radius:12px;cursor:pointer;background:var(--sur2);border:0.5px solid var(--b1);">
+          <div style="font-size:22px">🎯</div><span style="font-size:10px;color:var(--mu)">Challenge</span>
         </div>
         <div onclick="go('stats');toggleMoreMenu()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 4px;border-radius:12px;cursor:pointer;background:var(--sur2);border:0.5px solid var(--b1);">
           <div style="font-size:22px">📊</div><span style="font-size:10px;color:var(--mu)">Stats</span>
@@ -607,7 +677,260 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('s-uav').textContent = initials;
     await loadFromCloud();
     render(); renderDSA(); renderStats(); renderAchievements();
-    if(S.lcUsername) setTimeout(syncLeetCode, 2000);
+    
+// ── LEETCODE RENDER (enhanced) ──
+function renderHeatmap(byDate){
+  const today = new Date();
+  const cells = [];
+  // Build 15 weeks x 7 days = 105 days
+  for(let w=14;w>=0;w--){
+    const col=[];
+    for(let d=6;d>=0;d--){
+      const date=new Date(today);
+      date.setDate(today.getDate()-(w*7+d));
+      const key=date.toISOString().split('T')[0];
+      const count=(byDate[key]||[]).length;
+      const lvl=count===0?0:count<=1?1:count<=3?2:count<=5?3:4;
+      col.push(`<div class="heatmap-cell hm-${lvl}" title="${key}: ${count} solved"></div>`);
+    }
+    cells.push(`<div class="heatmap-col">${col.join('')}</div>`);
+  }
+  return `<div class="heatmap-wrap">
+    <div class="heatmap">${cells.join('')}</div>
+    <div class="heatmap-legend">Less <div class="heatmap-cell hm-0"></div><div class="heatmap-cell hm-1"></div><div class="heatmap-cell hm-2"></div><div class="heatmap-cell hm-3"></div><div class="heatmap-cell hm-4"></div> More</div>
+  </div>`;
+}
+
+function renderTopicBars(byTopic){
+  const sorted=Object.entries(byTopic).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  if(!sorted.length) return '<div class="empty">No topic data yet</div>';
+  const max=sorted[0][1];
+  return sorted.map(([name,count])=>`
+    <div class="topic-bar-row">
+      <div class="topic-bar-label" title="${name}">${name}</div>
+      <div class="topic-bar-track"><div class="topic-bar-fill" style="width:${Math.round(count/max*100)}%"></div></div>
+      <div class="topic-bar-count">${count}</div>
+    </div>`).join('');
+}
+
+function renderLeetCode(){
+  const el=document.getElementById('lc-content');
+  if(!el)return;
+  if(!S.lcUsername){
+    el.innerHTML=`<div class="lc-card">
+      <div class="ch"><div class="dot" style="background:#f59e0b"></div><span class="ct">Connect LeetCode</span></div>
+      <div class="lc-setup">
+        <p>Enter your LeetCode username to sync solved problems, track daily progress by topic, and see your activity calendar!</p>
+        <div class="lc-input-row">
+          <input type="text" id="lc-username-inp" placeholder="Your LeetCode username" style="flex:1"/>
+          <button class="btn bam" style="width:auto;padding:10px 16px" onclick="saveLCUsername()">Connect</button>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
+  const data=S.lcData;
+  if(!data){
+    el.innerHTML=`<div class="lc-card">
+      <div class="ch"><div class="dot" style="background:#f59e0b"></div><span class="ct">LeetCode — ${S.lcUsername}</span>
+        <button class="lc-sync-btn" onclick="syncLeetCode()">🔄 Sync</button>
+      </div>
+      <div class="lc-body"><div class="lc-syncing" style="display:flex"><div class="lc-spin"></div>Fetching data...</div></div>
+    </div>`;
+    syncLeetCode();return;
+  }
+  const lastSync=S.lcLastSync?new Date(S.lcLastSync).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+  const dates=Object.keys(data.byDate).sort((a,b)=>b.localeCompare(a));
+
+  el.innerHTML=`
+    <div class="lc-card">
+      <div class="lc-header">
+        ${data.avatar?`<img src="${data.avatar}" class="lc-avatar"/>`:`<div class="lc-av-placeholder">${(data.username||'L')[0].toUpperCase()}</div>`}
+        <div><div class="lc-username">${data.username}</div>
+        <div class="lc-rank">${data.realName?data.realName+' • ':''}Rank #${(data.ranking||0).toLocaleString()}</div></div>
+        <button class="lc-sync-btn" onclick="syncLeetCode()">🔄 Sync</button>
+      </div>
+      <div class="lc-stats">
+        <div class="lc-stat lc-easy"><div class="n">${data.solved.easy}</div><div class="l">Easy ✓</div></div>
+        <div class="lc-stat lc-medium"><div class="n">${data.solved.medium}</div><div class="l">Medium ✓</div></div>
+        <div class="lc-stat lc-hard"><div class="n">${data.solved.hard}</div><div class="l">Hard ✓</div></div>
+      </div>
+      ${data.contest?`<div class="lc-contest">
+        <div class="lc-ct"><strong>${data.contest.rating}</strong>Contest Rating</div>
+        <div class="lc-ct"><strong>${data.contest.attended}</strong>Contests</div>
+        <div class="lc-ct"><strong>#${(data.contest.globalRanking||0).toLocaleString()}</strong>Global Rank</div>
+      </div>`:''}
+      <div class="lc-body">
+        <div class="stitle">Activity calendar</div>
+        ${renderHeatmap(data.byDate)}
+      </div>
+      <div class="lc-body" style="padding-top:0">
+        <div class="stitle">Topic breakdown</div>
+        ${renderTopicBars(data.byTopic||{})}
+      </div>
+      <div class="lc-body" style="padding-top:0">
+        <div class="stitle">Daily activity</div>
+        ${dates.length?dates.slice(0,10).map(date=>{
+          const probs=data.byDate[date];
+          const isToday=date===new Date().toISOString().split('T')[0];
+          return `<div class="lc-day">
+            <div class="lc-day-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
+              <span class="lc-day-date">${isToday?'📅 Today':''}${new Date(date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span>
+              <span class="lc-day-count">+${probs.length}</span>
+            </div>
+            <div class="lc-day-problems" style="display:none">
+              ${probs.map(p=>`<div class="lc-problem">✓ ${p.title} <span style="font-size:10px;opacity:0.6">(${p.lang})</span></div>`).join('')}
+            </div>
+          </div>`;
+        }).join(''):'<div class="empty">No recent activity</div>'}
+      </div>
+      ${lastSync?`<div class="lc-last-sync">Last synced: ${lastSync}</div>`:''}
+      <div style="padding:0 16px 14px;text-align:center">
+        <button onclick="disconnectLC()" style="font-size:11px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:var(--fn)">Disconnect LeetCode</button>
+      </div>
+    </div>`;
+}
+
+if(S.lcUsername) setTimeout(syncLeetCode, 2000);
+
+// ── DAILY CHALLENGE ──
+async function loadDailyChallenge(){
+  const today = td();
+  document.getElementById('ch-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+  // Check if already loaded today
+  if(S.challenge?.date === today){
+    renderChallenge();return;
+  }
+
+  const body = document.getElementById('ch-body');
+  body.innerHTML = '<div class="ch-loading"><div class="asp"></div>AI is generating your challenge...</div>';
+
+  // Build context from user's weak topics
+  const weakTopics = S.lcData?.byTopic ?
+    Object.entries(S.lcData.byTopic).sort((a,b)=>a[1]-b[1]).slice(0,3).map(t=>t[0]).join(', ') :
+    'Arrays, Dynamic Programming, Trees';
+
+  const dsaLevel = S.dsa < 20 ? 'beginner' : S.dsa < 60 ? 'intermediate' : 'advanced';
+
+  try{
+    const res = await fetch('/api/agent',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ messages:[{
+        role:'user',
+        content: `Generate a daily DSA coding challenge for a ${dsaLevel} level student.
+Their weak topics are: ${weakTopics}.
+They have solved ${S.dsa} problems total.
+
+Respond ONLY with a JSON object (no markdown, no explanation) in this exact format:
+{
+  "title": "Problem title",
+  "difficulty": "Easy|Medium|Hard",
+  "topic": "Main topic",
+  "description": "Clear problem description in 2-3 sentences",
+  "example": "Example input and output",
+  "hint": "A helpful hint without giving away the solution",
+  "approach": "Brief approach/technique to use"
+}`
+      }]})
+    });
+    const data = await res.json();
+    let ch = null;
+    try{
+      const text = data.reply || '';
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if(jsonMatch) ch = JSON.parse(jsonMatch[0]);
+    }catch(e){}
+
+    if(!ch){
+      // Fallback challenge
+      ch = {
+        title: "Two Sum",
+        difficulty: "Easy",
+        topic: "Arrays",
+        description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+        example: "Input: nums = [2,7,11,15], target = 9 → Output: [0,1]",
+        hint: "Think about using a hash map to store complements.",
+        approach: "Hash Map — O(n) time complexity"
+      };
+    }
+
+    S.challenge = { date: today, ...ch, solved: false, skipped: false };
+    sv(); renderChallenge();
+  }catch(e){
+    body.innerHTML = '<div class="empty">Failed to load challenge. Check your AI Agent API key.</div>';
+  }
+}
+
+function renderChallenge(){
+  const ch = S.challenge;
+  if(!ch) return;
+  const body = document.getElementById('ch-body');
+  const diffCls = ch.difficulty==='Easy'?'ch-easy':ch.difficulty==='Medium'?'ch-medium':'ch-hard';
+
+  body.innerHTML = `<div class="ch-problem">
+    <div class="ch-title">${ch.title}</div>
+    <div class="ch-meta">
+      <span class="ch-pill ${diffCls}">${ch.difficulty}</span>
+      <span class="ch-pill" style="background:rgba(124,111,255,0.1);color:var(--pu)">${ch.topic}</span>
+      ${ch.solved?'<span class="ch-pill" style="background:rgba(29,158,117,0.15);color:var(--gr)">✓ Solved +30 XP</span>':''}
+    </div>
+    <div class="ch-desc">${ch.description}</div>
+    ${ch.example?`<div style="font-size:12px;background:var(--sur2);border-radius:8px;padding:8px 10px;margin-bottom:12px;color:var(--mu);font-family:'DM Mono',monospace">${ch.example}</div>`:''}
+    <div class="ch-hint" id="ch-hint-box">${ch.hint}</div>
+    <div class="ch-actions">
+      ${!ch.solved?`
+        <button class="ch-btn ch-solve" onclick="markChallengeSolved()">✓ Mark Solved</button>
+        <button class="ch-btn ch-hint-btn" onclick="toggleHint()">💡 Show Hint</button>
+        <button class="ch-btn ch-skip" onclick="skipChallenge()">Skip</button>
+      `:`<button class="ch-btn ch-done" disabled>✓ Completed Today!</button>`}
+    </div>
+    ${ch.approach?`<div style="font-size:11px;color:var(--mu);margin-top:10px">💡 Approach: ${ch.approach}</div>`:''}
+  </div>`;
+
+  // Render history
+  const hist = (S.challengeHistory||[]).slice().reverse().slice(0,10);
+  const histEl = document.getElementById('ch-history');
+  if(hist.length){
+    histEl.innerHTML = hist.map(c=>`
+      <div class="ch-hist-item">
+        <div style="font-size:18px">${c.solved?'✅':'⏭'}</div>
+        <div class="ch-hist-title">${c.title}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+          <span class="ch-pill ${c.difficulty==='Easy'?'ch-easy':c.difficulty==='Medium'?'ch-medium':'ch-hard'}" style="font-size:10px;padding:2px 8px">${c.difficulty}</span>
+          <span class="ch-hist-date">${c.date}</span>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function toggleHint(){
+  const box = document.getElementById('ch-hint-box');
+  if(box) box.style.display = box.style.display==='block'?'none':'block';
+}
+
+function markChallengeSolved(){
+  if(!S.challenge || S.challenge.solved) return;
+  S.challenge.solved = true;
+  addXP(30, 'Daily challenge solved!');
+  S.challengeHistory = S.challengeHistory||[];
+  S.challengeHistory.push({...S.challenge});
+  if(S.challengeHistory.length > 30) S.challengeHistory.shift();
+  sv(); renderChallenge();
+  toast('Challenge solved! +30 XP 🎉');
+  checkAchievements();
+}
+
+function skipChallenge(){
+  if(!S.challenge) return;
+  S.challenge.skipped = true;
+  S.challengeHistory = S.challengeHistory||[];
+  S.challengeHistory.push({...S.challenge, solved:false});
+  sv(); renderChallenge();
+  toast('Challenge skipped');
+}
+
     if(S.notif&&Notification.permission==='granted') schedNotif();
   } else {
     currentUser = null;
@@ -980,7 +1303,7 @@ function go(name){
   // close more menu
   const mm=document.getElementById('more-menu');
   if(mm)mm.style.display='none';
-  const ns=['home','dsa','web','tasks','exams','stats','achievements','leetcode','agent'];
+  const ns=['home','dsa','web','tasks','exams','stats','achievements','leetcode','challenge','agent'];
   const mobileNs=['home','dsa','web','tasks','exams'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',mobileNs[i]===name));
   document.querySelectorAll('.sni').forEach((t,i)=>t.classList.toggle('active',ns[i]===name));
@@ -990,6 +1313,7 @@ function go(name){
   if(name==='stats')renderStats();
   if(name==='achievements')renderAchievements();
   if(name==='leetcode')renderLeetCode();
+  if(name==='challenge'){loadDailyChallenge();}
   window.scrollTo(0,0);
 }
 
