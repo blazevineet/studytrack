@@ -224,6 +224,42 @@
     .s-user{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:var(--sur2);margin-bottom:12px;cursor:pointer;}
     .s-uname{font-size:12px;font-weight:500;flex:1;}
     .s-uav{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--pu),var(--bl));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0;}
+
+    /* LEETCODE */
+    .lc-card{background:var(--sur);border:0.5px solid var(--b1);border-radius:16px;overflow:hidden;margin-bottom:14px;}
+    .lc-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:0.5px solid var(--b1);}
+    .lc-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+    .lc-av-placeholder{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
+    .lc-username{font-size:14px;font-weight:600;}
+    .lc-rank{font-size:11px;color:var(--mu);margin-top:2px;}
+    .lc-sync-btn{margin-left:auto;font-size:11px;padding:6px 12px;border-radius:20px;border:0.5px solid var(--b2);background:var(--sur2);color:var(--tx);cursor:pointer;font-family:var(--fn);white-space:nowrap;}
+    .lc-sync-btn:hover{background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.4);color:#f59e0b;}
+    .lc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 16px;border-bottom:0.5px solid var(--b1);}
+    .lc-stat{text-align:center;padding:10px 6px;border-radius:12px;border:0.5px solid;}
+    .lc-stat .n{font-size:20px;font-weight:600;}
+    .lc-stat .l{font-size:10px;margin-top:2px;opacity:0.8;}
+    .lc-easy{background:rgba(29,158,117,0.1);border-color:rgba(29,158,117,0.25);color:var(--gr);}
+    .lc-medium{background:rgba(239,159,39,0.1);border-color:rgba(239,159,39,0.25);color:var(--am);}
+    .lc-hard{background:rgba(226,75,74,0.1);border-color:rgba(226,75,74,0.25);color:#ff6b6a;}
+    .lc-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+    .lc-day{border-radius:10px;background:var(--sur2);border:0.5px solid var(--b1);overflow:hidden;}
+    .lc-day-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;}
+    .lc-day-date{font-size:12px;font-weight:500;}
+    .lc-day-count{font-size:11px;color:var(--am);background:rgba(239,159,39,0.1);padding:2px 8px;border-radius:20px;}
+    .lc-day-problems{padding:0 12px 10px;display:flex;flex-direction:column;gap:5px;}
+    .lc-problem{font-size:12px;color:var(--mu);padding:4px 0;border-bottom:0.5px solid var(--b1);display:flex;align-items:center;gap:6px;}
+    .lc-problem:last-child{border-bottom:none;}
+    .lc-topic-grid{display:flex;flex-wrap:wrap;gap:6px;}
+    .lc-topic{font-size:11px;padding:4px 10px;border-radius:20px;background:rgba(124,111,255,0.1);border:0.5px solid rgba(124,111,255,0.25);color:var(--pu);}
+    .lc-setup{padding:20px 16px;text-align:center;}
+    .lc-setup p{font-size:13px;color:var(--mu);margin-bottom:14px;line-height:1.6;}
+    .lc-input-row{display:flex;gap:8px;}
+    .lc-syncing{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mu);padding:10px 0;}
+    .lc-spin{width:14px;height:14px;border:1.5px solid var(--b2);border-top-color:var(--am);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+    .lc-contest{display:flex;gap:8px;padding:10px 16px;border-top:0.5px solid var(--b1);}
+    .lc-ct{flex:1;text-align:center;font-size:11px;color:var(--mu);}
+    .lc-ct strong{display:block;font-size:15px;font-weight:600;color:var(--tx);margin-bottom:2px;}
+    .lc-last-sync{font-size:10px;color:var(--mu);text-align:right;padding:6px 16px;}
   </style>
 </head>
 <body>
@@ -305,6 +341,7 @@
       <div class="sni" onclick="go('exams')"><span class="sni-i">📅</span>Exams</div>
       <div class="sni" onclick="go('stats')"><span class="sni-i">📊</span>Analytics</div>
       <div class="sni" onclick="go('achievements')"><span class="sni-i">🏆</span>Achievements</div>
+      <div class="sni" onclick="go('leetcode')"><span class="sni-i">💻</span>LeetCode</div>
       <div class="sni" onclick="go('agent')"><span class="sni-i">🤖</span>AI Agent</div>
     </nav>
     <div class="sdate" id="sdate"></div>
@@ -474,6 +511,14 @@
         <div class="ach-grid" id="ach-grid"></div>
       </div>
 
+
+      <!-- LEETCODE -->
+      <div class="page" id="page-leetcode">
+        <div id="lc-content">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+
       <!-- AGENT -->
       <div class="page" id="page-agent">
         <div id="ah">
@@ -562,6 +607,7 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('s-uav').textContent = initials;
     await loadFromCloud();
     render(); renderDSA(); renderStats(); renderAchievements();
+    if(S.lcUsername) setTimeout(syncLeetCode, 2000);
     if(S.notif&&Notification.permission==='granted') schedNotif();
   } else {
     currentUser = null;
@@ -934,7 +980,7 @@ function go(name){
   // close more menu
   const mm=document.getElementById('more-menu');
   if(mm)mm.style.display='none';
-  const ns=['home','dsa','web','tasks','exams','stats','achievements','agent'];
+  const ns=['home','dsa','web','tasks','exams','stats','achievements','leetcode','agent'];
   const mobileNs=['home','dsa','web','tasks','exams'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',mobileNs[i]===name));
   document.querySelectorAll('.sni').forEach((t,i)=>t.classList.toggle('active',ns[i]===name));
@@ -943,6 +989,7 @@ function go(name){
   if(name==='dsa')renderDSA();
   if(name==='stats')renderStats();
   if(name==='achievements')renderAchievements();
+  if(name==='leetcode')renderLeetCode();
   window.scrollTo(0,0);
 }
 
@@ -1072,6 +1119,169 @@ document.getElementById('dsa-in').addEventListener('keydown',e=>{if(e.key==='Ent
 document.getElementById('web-in').addEventListener('keydown',e=>{if(e.key==='Enter')logWeb();});
 document.getElementById('ainp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();agSend();}});
 document.getElementById('ainp').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px';});
+
+
+// ── LEETCODE SYNC ──
+async function syncLeetCode(){
+  const username = S.lcUsername;
+  if(!username) return;
+  const btn = document.getElementById('lc-sync-btn');
+  if(btn){ btn.textContent='Syncing...'; btn.disabled=true; }
+
+  // Show syncing state
+  const lcs = document.getElementById('lc-syncing');
+  if(lcs) lcs.style.display='flex';
+
+  try{
+    const res = await fetch('/api/leetcode', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username })
+    });
+    const data = await res.json();
+    if(data.error){ toast('LeetCode: ' + data.error); return; }
+
+    // Save to state
+    S.lcData = data;
+    S.lcLastSync = new Date().toISOString();
+
+    // Update DSA count with today's LeetCode solves
+    const today = new Date().toISOString().split('T')[0];
+    const todaySolves = (data.byDate[today] || []).length;
+    if(todaySolves > 0){
+      const alreadyCounted = S.lcTodayCounted || '';
+      if(alreadyCounted !== today){
+        S.dsa = (S.dsa||0) + todaySolves;
+        const s = upStr(S.dsaLast, S.dsaStr);
+        S.dsaStr = s.str; S.dsaLast = s.last;
+        addXP(todaySolves * XP_PER_DSA, `${todaySolves} LeetCode problems`);
+        S.lcTodayCounted = today;
+        toast(`LeetCode synced! +${todaySolves} problems today ⚡`);
+      } else {
+        toast('LeetCode synced! ✓');
+      }
+    } else {
+      toast('LeetCode synced! No new solves today.');
+    }
+
+    sv(); renderLeetCode();
+    checkAchievements();
+  } catch(e){
+    toast('Sync failed — check username');
+  } finally {
+    if(btn){ btn.textContent='🔄 Sync'; btn.disabled=false; }
+    const lcs2 = document.getElementById('lc-syncing');
+    if(lcs2) lcs2.style.display='none';
+  }
+}
+
+function saveLCUsername(){
+  const inp = document.getElementById('lc-username-inp');
+  const val = inp.value.trim();
+  if(!val){ toast('Enter your LeetCode username!'); return; }
+  S.lcUsername = val;
+  sv(); renderLeetCode();
+  syncLeetCode();
+}
+
+function disconnectLC(){
+  if(!confirm('Disconnect LeetCode?')) return;
+  S.lcUsername = ''; S.lcData = null; S.lcLastSync = '';
+  sv(); renderLeetCode();
+  toast('LeetCode disconnected');
+}
+
+function renderLeetCode(){
+  const el = document.getElementById('lc-content');
+  if(!el) return;
+
+  if(!S.lcUsername){
+    el.innerHTML = `
+      <div class="lc-card">
+        <div class="ch"><div class="dot" style="background:#f59e0b"></div><span class="ct">Connect LeetCode</span></div>
+        <div class="lc-setup">
+          <p>Enter your LeetCode username to automatically sync your solved problems, track daily progress, and update your DSA streak!</p>
+          <div class="lc-input-row">
+            <input type="text" id="lc-username-inp" placeholder="Your LeetCode username" style="flex:1"/>
+            <button class="btn bam" style="width:auto;padding:10px 16px" onclick="saveLCUsername()">Connect</button>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const data = S.lcData;
+  if(!data){
+    el.innerHTML = `
+      <div class="lc-card">
+        <div class="ch"><div class="dot" style="background:#f59e0b"></div><span class="ct">LeetCode</span>
+          <button class="lc-sync-btn" id="lc-sync-btn" onclick="syncLeetCode()">🔄 Sync</button>
+        </div>
+        <div class="lc-body">
+          <div class="lc-syncing" id="lc-syncing" style="display:flex">
+            <div class="lc-spin"></div>Fetching your LeetCode data...
+          </div>
+          <div style="text-align:center;padding:10px 0">
+            <div style="font-size:13px;color:var(--mu)">Username: <strong style="color:var(--tx)">${S.lcUsername}</strong></div>
+            <button onclick="syncLeetCode()" class="btn bam" style="margin-top:12px;max-width:200px">Sync Now</button>
+          </div>
+        </div>
+      </div>`;
+    syncLeetCode();
+    return;
+  }
+
+  // Sort dates newest first
+  const dates = Object.keys(data.byDate).sort((a,b)=>b.localeCompare(a));
+  const topTopics = Object.entries(data.byTopic).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const lastSync = S.lcLastSync ? new Date(S.lcLastSync).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+
+  el.innerHTML = `
+    <div class="lc-card">
+      <div class="lc-header">
+        ${data.avatar ? `<img src="${data.avatar}" class="lc-avatar"/>` : `<div class="lc-av-placeholder">${(data.username||'L')[0].toUpperCase()}</div>`}
+        <div>
+          <div class="lc-username">${data.username}</div>
+          <div class="lc-rank">${data.realName ? data.realName + ' • ' : ''}Rank #${(data.ranking||0).toLocaleString()}</div>
+        </div>
+        <button class="lc-sync-btn" id="lc-sync-btn" onclick="syncLeetCode()">🔄 Sync</button>
+      </div>
+      <div class="lc-stats">
+        <div class="lc-stat lc-easy"><div class="n">${data.solved.easy}</div><div class="l">Easy</div></div>
+        <div class="lc-stat lc-medium"><div class="n">${data.solved.medium}</div><div class="l">Medium</div></div>
+        <div class="lc-stat lc-hard"><div class="n">${data.solved.hard}</div><div class="l">Hard</div></div>
+      </div>
+      ${data.contest ? `<div class="lc-contest">
+        <div class="lc-ct"><strong>${data.contest.rating}</strong>Rating</div>
+        <div class="lc-ct"><strong>${data.contest.attended}</strong>Contests</div>
+        <div class="lc-ct"><strong>#${(data.contest.globalRanking||0).toLocaleString()}</strong>Global</div>
+      </div>` : ''}
+      ${topTopics.length ? `<div class="lc-body">
+        <div class="stitle">Top topics</div>
+        <div class="lc-topic-grid">${topTopics.map(([name,count])=>`<span class="lc-topic">${name} (${count})</span>`).join('')}</div>
+      </div>` : ''}
+      ${dates.length ? `<div class="lc-body" style="padding-top:0">
+        <div class="stitle">Daily activity (last ${dates.length} days)</div>
+        ${dates.slice(0,10).map(date => {
+          const probs = data.byDate[date];
+          const isToday = date === new Date().toISOString().split('T')[0];
+          return `<div class="lc-day">
+            <div class="lc-day-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
+              <span class="lc-day-date">${isToday?'Today — ':''} ${new Date(date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span>
+              <span class="lc-day-count">+${probs.length} solved</span>
+            </div>
+            <div class="lc-day-problems" style="display:none">
+              ${probs.map(p=>`<div class="lc-problem">✓ ${p.title} <span style="font-size:10px;opacity:0.6">(${p.lang})</span></div>`).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>` : '<div class="lc-body"><div class="empty">No recent activity found</div></div>'}
+      ${lastSync ? `<div class="lc-last-sync">Last synced: ${lastSync}</div>` : ''}
+      <div style="padding:0 16px 14px;text-align:center">
+        <button onclick="disconnectLC()" style="font-size:11px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:var(--fn)">Disconnect LeetCode</button>
+      </div>
+    </div>`;
+}
 
 ld();
 // Auth handles cloud load — local data used as fallback until auth resolves
