@@ -1,80 +1,75 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
   const { username } = req.body;
   if (!username) return res.status(400).json({ error: 'Username required' });
 
   try {
-    // LeetCode GraphQL API
-    const query = `
-      query getUserProfile($username: String!) {
-        matchedUser(username: $username) {
-          username
-          profile { realName userAvatar ranking }
-          submitStats {
-            acSubmissionNum {
-              difficulty
-              count
-              submissions
-            }
-          }
-        }
-        recentAcSubmissionList(username: $username, limit: 50) {
-          id
-          title
-          titleSlug
-          timestamp
-          lang
-          topicTags { name slug }
-        }
-        userContestRanking(username: $username) {
-          attendedContestsCount
-          rating
-          globalRanking
-        }
-      }
-    `;
+    // Get CSRF token first
+    const loginPage = await fetch('https://leetcode.com', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+    });
+    const cookies = loginPage.headers.get('set-cookie') || '';
+    const csrfMatch = cookies.match(/csrftoken=([^;]+)/);
+    const csrf = csrfMatch ? csrfMatch[1] : '';
+    const cookieStr = cookies.split(',').map(c => c.trim().split(';')[0]).join('; ');
 
-    const response = await fetch('https://leetcode.com/graphql', {
+    const query = `query getUserData($username: String!) {
+      matchedUser(username: $username) {
+        username
+        profile { realName userAvatar ranking }
+        submitStats { acSubmissionNum { difficulty count } }
+        userCalendar { streak totalActiveDays submissionCalendar }
+      }
+      recentAcSubmissionList(username: $username, limit: 50) {
+        id title titleSlug timestamp lang
+      }
+      userContestRanking(username: $username) {
+        attendedContestsCount rating globalRanking
+      }
+    }`;
+
+    const gqlRes = await fetch('https://leetcode.com/graphql/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Referer': 'https://leetcode.com',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://leetcode.com/',
         'Origin': 'https://leetcode.com',
+        'x-csrftoken': csrf,
+        'Cookie': cookieStr,
       },
       body: JSON.stringify({ query, variables: { username } })
     });
 
-    const data = await response.json();
-
-    if (data.errors || !data.data?.matchedUser) {
-      return res.status(404).json({ error: 'LeetCode user not found' });
-    }
+    const data = await gqlRes.json();
+    if (!data?.data?.matchedUser) return res.status(404).json({ error: `User "${username}" not found` });
 
     const user = data.data.matchedUser;
     const recent = data.data.recentAcSubmissionList || [];
     const contest = data.data.userContestRanking;
 
-    // Process recent submissions — group by date and topic
-    const byDate = {};
-    const byTopic = {};
+    const solved = {};
+    (user.submitStats?.acSubmissionNum || []).forEach(s => { solved[s.difficulty] = s.count; });
 
+    // Parse submission calendar for heatmap
+    let calByDate = {};
+    try {
+      const cal = user.userCalendar?.submissionCalendar;
+      if (cal) {
+        const raw = JSON.parse(cal);
+        Object.entries(raw).forEach(([ts, count]) => {
+          const date = new Date(parseInt(ts) * 1000).toISOString().split('T')[0];
+          calByDate[date] = count;
+        });
+      }
+    } catch(e) {}
+
+    // Group recent by date with problem details
+    const byDate = {};
     recent.forEach(sub => {
       const date = new Date(parseInt(sub.timestamp) * 1000).toISOString().split('T')[0];
       if (!byDate[date]) byDate[date] = [];
       byDate[date].push({ title: sub.title, slug: sub.titleSlug, lang: sub.lang });
-
-      // Group by topic tags
-      (sub.topicTags || []).forEach(tag => {
-        if (!byTopic[tag.name]) byTopic[tag.name] = 0;
-        byTopic[tag.name]++;
-      });
-    });
-
-    // Get total solved per difficulty
-    const solved = {};
-    (user.submitStats?.acSubmissionNum || []).forEach(s => {
-      solved[s.difficulty] = s.count;
     });
 
     return res.status(200).json({
@@ -82,23 +77,23 @@ export default async function handler(req, res) {
       realName: user.profile?.realName || '',
       avatar: user.profile?.userAvatar || '',
       ranking: user.profile?.ranking || 0,
+      streak: user.userCalendar?.streak || 0,
+      totalActiveDays: user.userCalendar?.totalActiveDays || 0,
       solved: {
         easy: solved['Easy'] || 0,
         medium: solved['Medium'] || 0,
         hard: solved['Hard'] || 0,
         total: solved['All'] || 0,
       },
-      byDate,   // { "2026-03-16": [{title, slug, lang}] }
-      byTopic,  // { "Array": 12, "Dynamic Programming": 5 }
+      calByDate,
+      byDate,
       contest: contest ? {
         attended: contest.attendedContestsCount,
         rating: Math.round(contest.rating || 0),
         globalRanking: contest.globalRanking
       } : null,
-      recentCount: recent.length
     });
-
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to fetch LeetCode data: ' + err.message });
+    return res.status(500).json({ error: 'Failed: ' + err.message });
   }
 }
