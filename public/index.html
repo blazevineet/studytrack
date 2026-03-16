@@ -1541,34 +1541,82 @@ async function syncLeetCode(){
   }
 
   try{
-    const res = await fetch('/api/leetcode', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ username })
-    });
-    const data = await res.json();
+    // Call LeetCode GraphQL directly from browser (avoids server blocking)
+    const query = `query getUserData($username: String!) {
+      matchedUser(username: $username) {
+        username
+        profile { realName userAvatar ranking }
+        submitStats { acSubmissionNum { difficulty count } }
+        userCalendar { streak totalActiveDays submissionCalendar }
+      }
+      recentAcSubmissionList(username: $username, limit: 50) {
+        id title titleSlug timestamp lang
+      }
+      userContestRanking(username: $username) {
+        attendedContestsCount rating globalRanking
+      }
+    }`;
 
-    if(data.error){
-      // Show error with retry in the page
+    const res = await fetch('https://leetcode.com/graphql/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Referer': 'https://leetcode.com/',
+      },
+      body: JSON.stringify({ query, variables: { username } })
+    });
+
+    if(!res.ok) throw new Error('LeetCode returned ' + res.status);
+    const json = await res.json();
+
+    if(json.errors || !json.data?.matchedUser){
       const lc2 = document.getElementById('lc-content');
       if(lc2){
         lc2.innerHTML = `<div class="lc-card"><div class="ch"><div class="dot" style="background:#ff6b6a"></div>
-          <span class="ct">LeetCode Sync Failed</span></div>
+          <span class="ct">User Not Found</span></div>
           <div class="cbody" style="text-align:center;padding:20px 16px">
-            <div style="font-size:13px;color:#ff6b6a;margin-bottom:12px">⚠ ${data.error}</div>
-            <div style="font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.6">
-              Make sure your LeetCode username is correct.<br>
-              LeetCode sometimes rate-limits — try again in 30 seconds.
-            </div>
-            <div style="display:flex;gap:8px;justify-content:center">
-              <button class="btn bam" style="max-width:140px" onclick="syncLeetCode()">🔄 Retry</button>
-              <button class="btn" style="max-width:140px;background:var(--sur2);color:var(--tx);border:0.5px solid var(--b2)" onclick="disconnectLC()">Change username</button>
-            </div>
+            <div style="font-size:13px;color:#ff6b6a;margin-bottom:12px">⚠ Username "${username}" not found</div>
+            <div style="font-size:12px;color:var(--mu);margin-bottom:16px">Make sure your LeetCode username is correct.</div>
+            <button class="btn" style="max-width:160px;background:var(--sur2);color:var(--tx);border:0.5px solid var(--b2)" onclick="disconnectLC()">Change username</button>
           </div></div>`;
       }
-      toast('LeetCode sync failed');
       return;
     }
+
+    // Parse response
+    const user = json.data.matchedUser;
+    const recent = json.data.recentAcSubmissionList || [];
+    const contest = json.data.userContestRanking;
+    const solved = {};
+    (user.submitStats?.acSubmissionNum || []).forEach(s => { solved[s.difficulty] = s.count; });
+
+    let calByDate = {};
+    try {
+      const cal = user.userCalendar?.submissionCalendar;
+      if(cal){ const raw=JSON.parse(cal); Object.entries(raw).forEach(([ts,cnt])=>{ calByDate[new Date(parseInt(ts)*1000).toISOString().split('T')[0]]=cnt; }); }
+    } catch(e){}
+
+    const byDate = {};
+    recent.forEach(sub => {
+      const date = new Date(parseInt(sub.timestamp)*1000).toISOString().split('T')[0];
+      if(!byDate[date]) byDate[date]=[];
+      if(!byDate[date].find(p=>p.slug===sub.titleSlug))
+        byDate[date].push({title:sub.title, slug:sub.titleSlug, lang:sub.lang});
+    });
+
+    const data = {
+      username: user.username,
+      realName: user.profile?.realName||'',
+      avatar: user.profile?.userAvatar||'',
+      ranking: user.profile?.ranking||0,
+      streak: user.userCalendar?.streak||0,
+      totalActiveDays: user.userCalendar?.totalActiveDays||0,
+      solved: { easy:solved['Easy']||0, medium:solved['Medium']||0, hard:solved['Hard']||0, total:solved['All']||0 },
+      calByDate, byDate,
+      contest: contest ? { attended:contest.attendedContestsCount, rating:Math.round(contest.rating||0), globalRanking:contest.globalRanking } : null,
+    };
+
+    // data ready — fall through to save
 
     // Save to state
     S.lcData = data;
