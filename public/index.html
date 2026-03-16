@@ -303,27 +303,6 @@
     .ch-hist-date{font-size:10px;color:var(--mu);}
     .ch-loading{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mu);padding:16px 0;}
     .ch-xp{font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.1);padding:3px 10px;border-radius:20px;}
-
-    /* HEATMAP CALENDAR */
-    .lc-heatmap{padding:14px 16px;border-top:0.5px solid var(--b1);}
-    .lc-heatmap-title{font-size:12px;color:var(--mu);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;justify-content:space-between;}
-    .heatmap-grid{display:flex;gap:3px;overflow-x:auto;padding-bottom:4px;}
-    .heatmap-grid::-webkit-scrollbar{height:3px;}
-    .heatmap-grid::-webkit-scrollbar-thumb{background:var(--b2);border-radius:10px;}
-    .heatmap-week{display:flex;flex-direction:column;gap:3px;}
-    .heatmap-day{width:12px;height:12px;border-radius:2px;background:var(--sur2);flex-shrink:0;cursor:pointer;position:relative;}
-    .heatmap-day.l1{background:rgba(29,158,117,0.3);}
-    .heatmap-day.l2{background:rgba(29,158,117,0.55);}
-    .heatmap-day.l3{background:rgba(29,158,117,0.8);}
-    .heatmap-day.l4{background:#1D9E75;}
-    .heatmap-day.today{outline:1.5px solid var(--am);}
-    .heatmap-months{display:flex;gap:3px;margin-bottom:4px;overflow-x:auto;}
-    .heatmap-months::-webkit-scrollbar{display:none;}
-    .hm-month{font-size:9px;color:var(--mu);min-width:40px;}
-    .lc-streak-row{display:flex;gap:10px;margin-bottom:10px;}
-    .lc-streak-item{flex:1;background:var(--sur2);border-radius:10px;padding:8px 10px;text-align:center;}
-    .lc-streak-item .n{font-size:18px;font-weight:600;color:var(--gr);}
-    .lc-streak-item .l{font-size:10px;color:var(--mu);margin-top:2px;}
   </style>
 </head>
 <body>
@@ -732,60 +711,6 @@ function renderTopicBars(byTopic){
       <div class="topic-bar-track"><div class="topic-bar-fill" style="width:${Math.round(count/max*100)}%"></div></div>
       <div class="topic-bar-count">${count}</div>
     </div>`).join('');
-}
-
-
-function buildHeatmap(calByDate, streak, totalActiveDays) {
-  if(!calByDate || Object.keys(calByDate).length === 0) return '';
-
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-
-  // Build 52 weeks of data
-  const weeks = [];
-  const start = new Date(today);
-  start.setDate(start.getDate() - (52 * 7));
-
-  let currentWeek = [];
-  let monthLabels = [];
-  let lastMonth = -1;
-
-  for (let i = 0; i < 52 * 7; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
-    const count = calByDate[dateStr] || 0;
-    const isToday = dateStr === todayStr;
-    const level = count === 0 ? 0 : count <= 2 ? 1 : count <= 4 ? 2 : count <= 6 ? 3 : 4;
-
-    const month = d.getMonth();
-    if (month !== lastMonth && d.getDay() === 0) {
-      monthLabels.push({ week: weeks.length, label: d.toLocaleDateString('en-US',{month:'short'}) });
-      lastMonth = month;
-    }
-
-    currentWeek.push({ dateStr, count, level, isToday });
-    if (currentWeek.length === 7 || i === 52*7-1) {
-      weeks.push([...currentWeek]);
-      currentWeek = [];
-    }
-  }
-
-  const maxCount = Math.max(...Object.values(calByDate));
-
-  return `<div class="lc-heatmap">
-    <div class="lc-streak-row">
-      <div class="lc-streak-item"><div class="n">${streak||0} 🔥</div><div class="l">Current streak</div></div>
-      <div class="lc-streak-item"><div class="n">${totalActiveDays||0}</div><div class="l">Active days</div></div>
-      <div class="lc-streak-item"><div class="n">${maxCount}</div><div class="l">Best day</div></div>
-    </div>
-    <div class="lc-heatmap-title"><span>Submission activity</span><span>${Object.keys(calByDate).length} active days</span></div>
-    <div class="heatmap-grid" id="heatmap-grid">
-      ${weeks.map(week => `<div class="heatmap-week">
-        ${week.map(day => `<div class="heatmap-day l${day.level}${day.isToday?' today':''}" title="${day.dateStr}: ${day.count} submissions"></div>`).join('')}
-      </div>`).join('')}
-    </div>
-  </div>`;
 }
 
 function renderLeetCode(){
@@ -1524,52 +1449,21 @@ document.getElementById('ainp').addEventListener('input',function(){this.style.h
 async function syncLeetCode(){
   const username = S.lcUsername;
   if(!username) return;
-
   const btn = document.getElementById('lc-sync-btn');
-  if(btn){ btn.textContent='⏳ Syncing...'; btn.disabled=true; }
+  if(btn){ btn.textContent='Syncing...'; btn.disabled=true; }
 
-  // Show loading state in page
-  const lc = document.getElementById('lc-content');
-  if(lc && !S.lcData){
-    lc.innerHTML = `<div class="lc-card"><div class="ch"><div class="dot" style="background:#f59e0b"></div>
-      <span class="ct">LeetCode — ${username}</span></div>
-      <div class="cbody" style="padding:20px 16px;text-align:center">
-        <div style="display:flex;align-items:center;justify-content:center;gap:10px;color:var(--mu);font-size:13px">
-          <div class="lc-spin"></div>Fetching your LeetCode data...
-        </div>
-      </div></div>`;
-  }
+  // Show syncing state
+  const lcs = document.getElementById('lc-syncing');
+  if(lcs) lcs.style.display='flex';
 
   try{
-    // Call our secure backend API
     const res = await fetch('/api/leetcode', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ username })
     });
-
-    if(!res.ok) throw new Error('Server error ' + res.status);
     const data = await res.json();
-
-    if(data.error){
-      const lc2 = document.getElementById('lc-content');
-      if(lc2){
-        lc2.innerHTML = `<div class="lc-card"><div class="ch"><div class="dot" style="background:#ff6b6a"></div>
-          <span class="ct">Sync Failed</span></div>
-          <div class="cbody" style="text-align:center;padding:20px 16px">
-            <div style="font-size:13px;color:#ff6b6a;margin-bottom:12px">⚠ ${data.error}</div>
-            <div style="font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.6">
-              LeetCode sometimes rate-limits requests.<br>Wait 1-2 minutes and try again.
-            </div>
-            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-              <button class="btn bam" style="max-width:120px" onclick="syncLeetCode()">🔄 Retry</button>
-              <button class="btn" style="max-width:160px;background:var(--sur2);color:var(--tx);border:0.5px solid var(--b2)" onclick="disconnectLC()">Change username</button>
-            </div>
-          </div></div>`;
-      }
-      toast('Sync failed — try again');
-      return;
-    }
+    if(data.error){ toast('LeetCode: ' + data.error); return; }
 
     // Save to state
     S.lcData = data;
@@ -1586,7 +1480,7 @@ async function syncLeetCode(){
         S.dsaStr = s.str; S.dsaLast = s.last;
         addXP(todaySolves * XP_PER_DSA, `${todaySolves} LeetCode problems`);
         S.lcTodayCounted = today;
-        toast(`Synced! +${todaySolves} LeetCode problems today ⚡`);
+        toast(`LeetCode synced! +${todaySolves} problems today ⚡`);
       } else {
         toast('LeetCode synced! ✓');
       }
@@ -1594,23 +1488,14 @@ async function syncLeetCode(){
       toast('LeetCode synced! No new solves today.');
     }
 
-    sv(); render(); renderLeetCode(); checkAchievements();
-
+    sv(); renderLeetCode();
+    checkAchievements();
   } catch(e){
-    const lc2 = document.getElementById('lc-content');
-    if(lc2){
-      lc2.innerHTML = `<div class="lc-card"><div class="ch"><div class="dot" style="background:#ff6b6a"></div>
-        <span class="ct">Connection Error</span></div>
-        <div class="cbody" style="text-align:center;padding:20px 16px">
-          <div style="font-size:13px;color:#ff6b6a;margin-bottom:12px">Could not reach LeetCode API</div>
-          <div style="font-size:12px;color:var(--mu);margin-bottom:16px">Check your internet connection and try again.</div>
-          <button class="btn bam" style="max-width:140px" onclick="syncLeetCode()">🔄 Retry</button>
-        </div></div>`;
-    }
-    toast('Network error — retry');
+    toast('Sync failed — check username');
   } finally {
-    const btn2 = document.getElementById('lc-sync-btn');
-    if(btn2){ btn2.textContent='🔄 Sync'; btn2.disabled=false; }
+    if(btn){ btn.textContent='🔄 Sync'; btn.disabled=false; }
+    const lcs2 = document.getElementById('lc-syncing');
+    if(lcs2) lcs2.style.display='none';
   }
 }
 
@@ -1628,60 +1513,6 @@ function disconnectLC(){
   S.lcUsername = ''; S.lcData = null; S.lcLastSync = '';
   sv(); renderLeetCode();
   toast('LeetCode disconnected');
-}
-
-
-function buildHeatmap(calByDate, streak, totalActiveDays) {
-  if(!calByDate || Object.keys(calByDate).length === 0) return '';
-
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-
-  // Build 52 weeks of data
-  const weeks = [];
-  const start = new Date(today);
-  start.setDate(start.getDate() - (52 * 7));
-
-  let currentWeek = [];
-  let monthLabels = [];
-  let lastMonth = -1;
-
-  for (let i = 0; i < 52 * 7; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
-    const count = calByDate[dateStr] || 0;
-    const isToday = dateStr === todayStr;
-    const level = count === 0 ? 0 : count <= 2 ? 1 : count <= 4 ? 2 : count <= 6 ? 3 : 4;
-
-    const month = d.getMonth();
-    if (month !== lastMonth && d.getDay() === 0) {
-      monthLabels.push({ week: weeks.length, label: d.toLocaleDateString('en-US',{month:'short'}) });
-      lastMonth = month;
-    }
-
-    currentWeek.push({ dateStr, count, level, isToday });
-    if (currentWeek.length === 7 || i === 52*7-1) {
-      weeks.push([...currentWeek]);
-      currentWeek = [];
-    }
-  }
-
-  const maxCount = Math.max(...Object.values(calByDate));
-
-  return `<div class="lc-heatmap">
-    <div class="lc-streak-row">
-      <div class="lc-streak-item"><div class="n">${streak||0} 🔥</div><div class="l">Current streak</div></div>
-      <div class="lc-streak-item"><div class="n">${totalActiveDays||0}</div><div class="l">Active days</div></div>
-      <div class="lc-streak-item"><div class="n">${maxCount}</div><div class="l">Best day</div></div>
-    </div>
-    <div class="lc-heatmap-title"><span>Submission activity</span><span>${Object.keys(calByDate).length} active days</span></div>
-    <div class="heatmap-grid" id="heatmap-grid">
-      ${weeks.map(week => `<div class="heatmap-week">
-        ${week.map(day => `<div class="heatmap-day l${day.level}${day.isToday?' today':''}" title="${day.dateStr}: ${day.count} submissions"></div>`).join('')}
-      </div>`).join('')}
-    </div>
-  </div>`;
 }
 
 function renderLeetCode(){
@@ -1749,7 +1580,6 @@ function renderLeetCode(){
         <div class="lc-ct"><strong>${data.contest.attended}</strong>Contests</div>
         <div class="lc-ct"><strong>#${(data.contest.globalRanking||0).toLocaleString()}</strong>Global</div>
       </div>` : ''}
-      ${buildHeatmap(data.calByDate, data.streak, data.totalActiveDays)}
       ${topTopics.length ? `<div class="lc-body">
         <div class="stitle">Top topics</div>
         <div class="lc-topic-grid">${topTopics.map(([name,count])=>`<span class="lc-topic">${name} (${count})</span>`).join('')}</div>
