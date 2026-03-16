@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/manifest.json">
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="theme-color" content="#0f0f1a"/>
@@ -505,10 +504,19 @@
     <div id="btabs">
       <div class="tab active" onclick="go('home')"><div class="tab-i">🏠</div><span>Home</span></div>
       <div class="tab" onclick="go('dsa')"><div class="tab-i">🧩</div><span>DSA</span></div>
+      <div class="tab" onclick="go('web')"><div class="tab-i">🌐</div><span>Web</span></div>
       <div class="tab" onclick="go('tasks')"><div class="tab-i">✅</div><span>Tasks</span></div>
-      <div class="tab" onclick="go('stats')"><div class="tab-i">📊</div><span>Stats</span></div>
-      <div class="tab" onclick="go('achievements')"><div class="tab-i">🏆</div><span>Badges</span></div>
-      <div class="tab" onclick="go('agent')"><div class="tab-i">🤖</div><span>AI</span></div>
+      <div class="tab" onclick="go('exams')"><div class="tab-i">📅</div><span>Exams</span></div>
+      <div class="tab" onclick="go('more')"><div class="tab-i">☰</div><span>More</span></div>
+    </div>
+
+    <!-- MORE MENU -->
+    <div id="more-menu" style="display:none;position:fixed;bottom:56px;left:0;right:0;background:var(--sur);border-top:0.5px solid var(--b1);z-index:99;padding:12px 16px;display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div onclick="go('stats');hideMore()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;background:var(--sur2);border-radius:12px;cursor:pointer;font-size:10px;color:var(--mu)"><span style="font-size:22px">📊</span>Stats</div>
+        <div onclick="go('achievements');hideMore()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;background:var(--sur2);border-radius:12px;cursor:pointer;font-size:10px;color:var(--mu)"><span style="font-size:22px">🏆</span>Badges</div>
+        <div onclick="go('agent');hideMore()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;background:var(--sur2);border-radius:12px;cursor:pointer;font-size:10px;color:var(--mu)"><span style="font-size:22px">🤖</span>AI Agent</div>
+      </div>
     </div>
   </div>
 </div>
@@ -903,14 +911,23 @@ function render(){
   updateXPUI();
 }
 
+function toggleMoreMenu(){
+  const m=document.getElementById('more-menu');
+  m.style.display=m.style.display==='none'?'block':'none';
+}
+
 function go(name){
+  // close more menu
+  const mm=document.getElementById('more-menu');
+  if(mm)mm.style.display='none';
   const ns=['home','dsa','web','tasks','exams','stats','achievements','agent'];
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',[...'home,dsa,tasks,stats,achievements,agent'.split(',')][i]===name));
+  const mobileNs=['home','dsa','web','tasks','exams'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',mobileNs[i]===name));
   document.querySelectorAll('.sni').forEach((t,i)=>t.classList.toggle('active',ns[i]===name));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if(name==='dsa')renderDSA();
-  if(name==='stats'){renderStats();}
+  if(name==='stats')renderStats();
   if(name==='achievements')renderAchievements();
   window.scrollTo(0,0);
 }
