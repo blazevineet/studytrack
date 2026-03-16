@@ -1524,12 +1524,21 @@ document.getElementById('ainp').addEventListener('input',function(){this.style.h
 async function syncLeetCode(){
   const username = S.lcUsername;
   if(!username) return;
-  const btn = document.getElementById('lc-sync-btn');
-  if(btn){ btn.textContent='Syncing...'; btn.disabled=true; }
 
-  // Show syncing state
-  const lcs = document.getElementById('lc-syncing');
-  if(lcs) lcs.style.display='flex';
+  const btn = document.getElementById('lc-sync-btn');
+  if(btn){ btn.textContent='⏳ Syncing...'; btn.disabled=true; }
+
+  // Show loading state in page
+  const lc = document.getElementById('lc-content');
+  if(lc && !S.lcData){
+    lc.innerHTML = `<div class="lc-card"><div class="ch"><div class="dot" style="background:#f59e0b"></div>
+      <span class="ct">LeetCode — ${username}</span></div>
+      <div class="cbody" style="padding:20px 16px;text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;color:var(--mu);font-size:13px">
+          <div class="lc-spin"></div>Fetching your LeetCode data...
+        </div>
+      </div></div>`;
+  }
 
   try{
     const res = await fetch('/api/leetcode', {
@@ -1538,7 +1547,28 @@ async function syncLeetCode(){
       body: JSON.stringify({ username })
     });
     const data = await res.json();
-    if(data.error){ toast('LeetCode: ' + data.error); return; }
+
+    if(data.error){
+      // Show error with retry in the page
+      const lc2 = document.getElementById('lc-content');
+      if(lc2){
+        lc2.innerHTML = `<div class="lc-card"><div class="ch"><div class="dot" style="background:#ff6b6a"></div>
+          <span class="ct">LeetCode Sync Failed</span></div>
+          <div class="cbody" style="text-align:center;padding:20px 16px">
+            <div style="font-size:13px;color:#ff6b6a;margin-bottom:12px">⚠ ${data.error}</div>
+            <div style="font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.6">
+              Make sure your LeetCode username is correct.<br>
+              LeetCode sometimes rate-limits — try again in 30 seconds.
+            </div>
+            <div style="display:flex;gap:8px;justify-content:center">
+              <button class="btn bam" style="max-width:140px" onclick="syncLeetCode()">🔄 Retry</button>
+              <button class="btn" style="max-width:140px;background:var(--sur2);color:var(--tx);border:0.5px solid var(--b2)" onclick="disconnectLC()">Change username</button>
+            </div>
+          </div></div>`;
+      }
+      toast('LeetCode sync failed');
+      return;
+    }
 
     // Save to state
     S.lcData = data;
@@ -1555,7 +1585,7 @@ async function syncLeetCode(){
         S.dsaStr = s.str; S.dsaLast = s.last;
         addXP(todaySolves * XP_PER_DSA, `${todaySolves} LeetCode problems`);
         S.lcTodayCounted = today;
-        toast(`LeetCode synced! +${todaySolves} problems today ⚡`);
+        toast(`Synced! +${todaySolves} LeetCode problems today ⚡`);
       } else {
         toast('LeetCode synced! ✓');
       }
@@ -1563,14 +1593,23 @@ async function syncLeetCode(){
       toast('LeetCode synced! No new solves today.');
     }
 
-    sv(); renderLeetCode();
-    checkAchievements();
+    sv(); render(); renderLeetCode(); checkAchievements();
+
   } catch(e){
-    toast('Sync failed — check username');
+    const lc2 = document.getElementById('lc-content');
+    if(lc2){
+      lc2.innerHTML = `<div class="lc-card"><div class="ch"><div class="dot" style="background:#ff6b6a"></div>
+        <span class="ct">Connection Error</span></div>
+        <div class="cbody" style="text-align:center;padding:20px 16px">
+          <div style="font-size:13px;color:#ff6b6a;margin-bottom:12px">Could not reach LeetCode API</div>
+          <div style="font-size:12px;color:var(--mu);margin-bottom:16px">Check your internet connection and try again.</div>
+          <button class="btn bam" style="max-width:140px" onclick="syncLeetCode()">🔄 Retry</button>
+        </div></div>`;
+    }
+    toast('Network error — retry');
   } finally {
-    if(btn){ btn.textContent='🔄 Sync'; btn.disabled=false; }
-    const lcs2 = document.getElementById('lc-syncing');
-    if(lcs2) lcs2.style.display='none';
+    const btn2 = document.getElementById('lc-sync-btn');
+    if(btn2){ btn2.textContent='🔄 Sync'; btn2.disabled=false; }
   }
 }
 
