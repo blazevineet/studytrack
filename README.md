@@ -28,7 +28,7 @@ Your app is live at https://your-app.vercel.app 🎉
 
 ---
 
-## Install on Phone
+## Install on Phone 
 
 **Android**: Open URL in Chrome → tap Install banner → home screen icon
 
