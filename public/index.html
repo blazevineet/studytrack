@@ -1514,6 +1514,15 @@ function disconnectLC(){
   sv(); renderLeetCode();
   toast('LeetCode disconnected');
 }
+function changeLCUsername(){
+  const newName = prompt('Enter your LeetCode username:', S.lcUsername);
+  if(newName && newName.trim()){
+    S.lcUsername = newName.trim();
+    S.lcData = null;
+    sv(); renderLeetCode();
+    toast('Username updated!');
+  }
+}
 
 function renderLeetCode(){
   const el = document.getElementById('lc-content');
@@ -1601,8 +1610,9 @@ function renderLeetCode(){
         }).join('')}
       </div>` : '<div class="lc-body"><div class="empty">No recent activity found</div></div>'}
       ${lastSync ? `<div class="lc-last-sync">Last synced: ${lastSync}</div>` : ''}
-      <div style="padding:0 16px 14px;text-align:center">
-        <button onclick="disconnectLC()" style="font-size:11px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:var(--fn)">Disconnect LeetCode</button>
+       <div style="padding:0 16px 14px;display:flex;gap:16px;justify-content:center;">
+        <button onclick="disconnectLC()" style="font-size:11px;color:#ff6b6a;background:none;border:none;cursor:pointer;font-family:var(--fn)">✕ Disconnect</button>
+        <button onclick="changeLCUsername()" style="font-size:11px;color:var(--mu);background:none;border:none;cursor:pointer;font-family:var(--fn)">✏️ Change Username</button>
       </div>
     </div>`;
 }
