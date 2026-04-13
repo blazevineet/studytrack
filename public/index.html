@@ -677,13 +677,6 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('s-uav').textContent = initials;
     await loadFromCloud();
     render(); renderDSA(); renderStats(); renderAchievements();
-    if(S.lcUsername) setTimeout(syncLeetCode, 2000);
-    if(S.notif&&Notification.permission==='granted') schedNotif();
-  } else {
-    currentUser = null;
-    document.getElementById('login-screen').classList.remove('hidden');
-  }
-});
     
 // ── LEETCODE RENDER (enhanced) ──
 function renderHeatmap(byDate){
@@ -939,11 +932,11 @@ function skipChallenge(){
 }
 
     if(S.notif&&Notification.permission==='granted') schedNotif();
-   else {
+  } else {
     currentUser = null;
     document.getElementById('login-screen').classList.remove('hidden');
   }
-
+});
 
 async function signInGoogle(){
   try{ await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
