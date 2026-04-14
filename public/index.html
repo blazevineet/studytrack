@@ -254,6 +254,29 @@
     .ch-hist-title{flex:1;font-size:13px;}
     .ch-hist-date{font-size:10px;color:var(--mu);}
     .ch-loading{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mu);padding:16px 0;}
+
+    /* WEB DEV ENHANCED */
+    .web-cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+    .web-cat-tab{font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--b2);background:var(--sur2);color:var(--mu);cursor:pointer;font-family:var(--fn);}
+    .web-cat-tab.active{background:rgba(79,158,255,0.15);border-color:rgba(79,158,255,0.4);color:var(--bl);}
+    .web-topic-item{background:var(--sur2);border:0.5px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
+    .web-topic-header{display:flex;align-items:center;gap:8px;}
+    .web-topic-name{flex:1;font-size:13px;font-weight:500;}
+    .web-cat-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;}
+    .web-diff-easy{background:rgba(29,158,117,0.12);color:var(--gr);border:0.5px solid rgba(29,158,117,0.3);}
+    .web-diff-medium{background:rgba(239,159,39,0.12);color:var(--am);border:0.5px solid rgba(239,159,39,0.3);}
+    .web-diff-hard{background:rgba(226,75,74,0.12);color:#ff6b6a;border:0.5px solid rgba(226,75,74,0.3);}
+    .web-topic-meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;}
+    .web-topic-link{font-size:11px;color:var(--bl);text-decoration:none;background:rgba(79,158,255,0.08);border:0.5px solid rgba(79,158,255,0.2);padding:2px 8px;border-radius:8px;}
+    .web-topic-date{font-size:10px;color:var(--mu);}
+    .web-cat-progress{margin-bottom:10px;}
+    .web-cat-progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--mu);margin-bottom:4px;}
+    .web-goal-card{background:linear-gradient(135deg,rgba(79,158,255,0.08),rgba(124,111,255,0.08));border:0.5px solid rgba(79,158,255,0.2);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+    .web-goal-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+    .web-goal-title{font-size:12px;font-weight:500;}
+    .web-goal-count{font-size:11px;color:var(--bl);}
+    .web-goal-bar{height:6px;border-radius:10px;background:var(--sur2);overflow:hidden;}
+    .web-goal-fill{height:100%;border-radius:10px;background:var(--bl);transition:width 0.4s;}
   </style>
 </head>
 <body>
@@ -414,15 +437,81 @@
 
       <!-- WEB DEV -->
       <div class="page" id="page-web">
-        <div class="card">
-          <div class="ch"><div class="dot" style="background:var(--bl)"></div><span class="ct">Web Dev Tracker</span><span class="sbadge" style="background:rgba(79,158,255,0.15);color:var(--bl)" id="web-s">🔥 0 days</span></div>
-          <div class="cbody">
-            <div><div class="pl"><span>Topics learned</span><span id="web-t">0 / 50</span></div><div class="pt"><div class="pf" id="web-b" style="background:var(--bl);width:0%"></div></div></div>
-            <div class="brow"><input type="text" id="web-in" placeholder="Topic learned (e.g. React hooks)"/><button class="btn bbl" style="width:auto;padding:10px 16px" onclick="logWeb()">Log +15XP</button></div>
+        <!-- Stats row -->
+        <div class="sg" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:14px">
+          <div class="sc sbl"><div class="n" id="web-total-n">0</div><div class="l">Topics Learned</div></div>
+          <div class="sc sgr"><div class="n" id="web-this-week-n">0</div><div class="l">This Week</div></div>
+          <div class="sc spu"><div class="n" id="web-cats-n">0</div><div class="l">Categories</div></div>
+        </div>
+
+        <!-- Weekly Goal -->
+        <div class="web-goal-card" id="web-goal-card">
+          <div class="web-goal-row">
+            <span class="web-goal-title">🎯 Weekly Goal</span>
+            <span class="web-goal-count" id="web-goal-count">0 / 5 topics</span>
+          </div>
+          <div class="web-goal-bar"><div class="web-goal-fill" id="web-goal-fill" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;align-items:center;">
+            <span style="font-size:11px;color:var(--mu)" id="web-goal-status">Set a weekly goal below</span>
+            <button onclick="editWebGoal()" style="font-size:11px;color:var(--bl);background:none;border:none;cursor:pointer;font-family:var(--fn)">Edit goal</button>
           </div>
         </div>
-        <div class="stitle">Topics learned</div>
-        <div id="web-log"><div class="empty">No topics yet</div></div>
+
+        <!-- Add Topic -->
+        <div class="card">
+          <div class="ch"><div class="dot" style="background:var(--bl)"></div><span class="ct">Log Topic</span><span class="sbadge" style="background:rgba(79,158,255,0.15);color:var(--bl)" id="web-s">🔥 0 days</span></div>
+          <div class="cbody">
+            <input type="text" id="web-in" placeholder="Topic learned (e.g. React hooks)"/>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:4px">Category</div>
+                <select id="web-cat-sel" style="width:100%;font-size:13px;padding:10px 13px;border-radius:12px;border:0.5px solid var(--b2);background:var(--sur2);color:var(--tx);font-family:var(--fn);outline:none;">
+                  <option value="HTML">HTML</option>
+                  <option value="CSS">CSS</option>
+                  <option value="JavaScript" selected>JavaScript</option>
+                  <option value="React">React</option>
+                  <option value="Node.js">Node.js</option>
+                  <option value="Database">Database</option>
+                  <option value="DevOps">DevOps</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--mu);margin-bottom:4px">Difficulty</div>
+                <select id="web-diff-sel" style="width:100%;font-size:13px;padding:10px 13px;border-radius:12px;border:0.5px solid var(--b2);background:var(--sur2);color:var(--tx);font-family:var(--fn);outline:none;">
+                  <option value="Easy">Easy</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+            </div>
+            <input type="text" id="web-link-in" placeholder="Resource link (optional, e.g. https://...)"/>
+            <button class="btn bbl" onclick="logWeb()">Log Topic +15XP</button>
+          </div>
+        </div>
+
+        <!-- Category Progress -->
+        <div class="card">
+          <div class="ch"><div class="dot" style="background:var(--pu)"></div><span class="ct">Progress by Category</span></div>
+          <div class="cbody" id="web-cat-progress"><div class="empty">No topics yet</div></div>
+        </div>
+
+        <!-- Topic List with filter -->
+        <div class="card">
+          <div class="ch"><div class="dot" style="background:var(--bl)"></div><span class="ct">All Topics</span></div>
+          <div class="cbody">
+            <div class="web-cat-tabs" id="web-filter-tabs">
+              <div class="web-cat-tab active" onclick="filterWebCat('All')">All</div>
+              <div class="web-cat-tab" onclick="filterWebCat('HTML')">HTML</div>
+              <div class="web-cat-tab" onclick="filterWebCat('CSS')">CSS</div>
+              <div class="web-cat-tab" onclick="filterWebCat('JavaScript')">JS</div>
+              <div class="web-cat-tab" onclick="filterWebCat('React')">React</div>
+              <div class="web-cat-tab" onclick="filterWebCat('Node.js')">Node</div>
+              <div class="web-cat-tab" onclick="filterWebCat('Other')">Other</div>
+            </div>
+            <div id="web-log"><div class="empty">No topics yet</div></div>
+          </div>
+        </div>
       </div>
 
       <!-- TASKS -->
@@ -639,7 +728,111 @@ function renderStats(){
 
 // ── CORE FUNCTIONS ──
 function logDSA(){const v=parseInt(document.getElementById('dsa-in').value);if(!v||v<1)return;S.dsa+=v;const s=upStr(S.dsaLast,S.dsaStr);S.dsaStr=s.str;S.dsaLast=s.last;S.dsaLog.unshift({date:td(),count:v});if(S.dsaLog.length>60)S.dsaLog.pop();addXP(v*XP_PER_DSA,`${v} DSA problems`);S.bestStreak=Math.max(S.bestStreak||0,S.dsaStr);document.getElementById('dsa-in').value='';sv();render();renderDSA();checkAchievements();toast(`+${v} problems! +${v*XP_PER_DSA} XP ⚡`);}
-function logWeb(){const v=document.getElementById('web-in').value.trim();if(!v)return;S.web+=1;const s=upStr(S.webLast,S.webStr);S.webStr=s.str;S.webLast=s.last;S.webLog.unshift({date:td(),topic:v});if(S.webLog.length>60)S.webLog.pop();addXP(XP_PER_WEB,'Web Dev topic');document.getElementById('web-in').value='';sv();render();checkAchievements();toast(`Logged! +${XP_PER_WEB} XP ⚡`);}
+let webCatFilter = 'All';
+
+function logWeb(){
+  const v=document.getElementById('web-in').value.trim();if(!v)return;
+  const cat=document.getElementById('web-cat-sel')?.value||'JavaScript';
+  const diff=document.getElementById('web-diff-sel')?.value||'Medium';
+  const link=document.getElementById('web-link-in')?.value.trim()||'';
+  S.web+=1;
+  const s=upStr(S.webLast,S.webStr);S.webStr=s.str;S.webLast=s.last;
+  S.webLog=S.webLog||[];
+  S.webLog.unshift({date:td(),topic:v,cat,diff,link});
+  if(S.webLog.length>100)S.webLog.pop();
+  addXP(XP_PER_WEB,'Web Dev topic');
+  document.getElementById('web-in').value='';
+  if(document.getElementById('web-link-in'))document.getElementById('web-link-in').value='';
+  sv();render();renderWebDev();checkAchievements();
+  toast(`Logged! +${XP_PER_WEB} XP ⚡`);
+}
+
+function filterWebCat(cat){
+  webCatFilter=cat;
+  document.querySelectorAll('.web-cat-tab').forEach(t=>t.classList.toggle('active',t.textContent===cat||(cat==='All'&&t.textContent==='All')));
+  renderWebDev();
+}
+
+function editWebGoal(){
+  const cur=S.webGoal||5;
+  const n=prompt('Set weekly topic goal:',cur);
+  const v=parseInt(n);
+  if(!v||v<1)return;
+  S.webGoal=v;sv();renderWebDev();toast(`Goal set: ${v} topics/week!`);
+}
+
+function delWebTopic(idx){
+  if(!confirm('Delete this topic?'))return;
+  S.webLog.splice(idx,1);S.web=Math.max(0,S.web-1);sv();render();renderWebDev();
+}
+
+function renderWebDev(){
+  S.webLog=S.webLog||[];
+
+  // Stats
+  const thisWeek=S.webLog.filter(l=>{const d=new Date(l.date);const now=new Date();const weekAgo=new Date();weekAgo.setDate(now.getDate()-7);return d>=weekAgo;}).length;
+  const cats=[...new Set(S.webLog.map(l=>l.cat||'Other'))];
+  const el1=document.getElementById('web-total-n');if(el1)el1.textContent=S.web;
+  const el2=document.getElementById('web-this-week-n');if(el2)el2.textContent=thisWeek;
+  const el3=document.getElementById('web-cats-n');if(el3)el3.textContent=cats.length;
+
+  // Weekly goal
+  const goal=S.webGoal||5;
+  const pct=Math.min(100,Math.round(thisWeek/goal*100));
+  const gf=document.getElementById('web-goal-fill');if(gf)gf.style.width=pct+'%';
+  const gc=document.getElementById('web-goal-count');if(gc)gc.textContent=`${thisWeek} / ${goal} topics`;
+  const gs=document.getElementById('web-goal-status');
+  if(gs){
+    if(thisWeek>=goal)gs.textContent='🎉 Goal achieved this week!';
+    else if(thisWeek===0)gs.textContent='Start logging topics to track progress';
+    else gs.textContent=`${goal-thisWeek} more to hit your goal this week`;
+  }
+
+  // Category progress
+  const catEl=document.getElementById('web-cat-progress');
+  if(catEl){
+    const ALL_CATS=['HTML','CSS','JavaScript','React','Node.js','Database','DevOps','Other'];
+    const catCounts={};
+    S.webLog.forEach(l=>{const c=l.cat||'Other';catCounts[c]=(catCounts[c]||0)+1;});
+    const usedCats=Object.entries(catCounts).sort((a,b)=>b[1]-a[1]);
+    if(!usedCats.length){catEl.innerHTML='<div class="empty">No topics logged yet</div>';}
+    else{
+      const maxCount=usedCats[0][1];
+      const CAT_COLORS={'HTML':'#e34c26','CSS':'#264de4','JavaScript':'#f7df1e','React':'#61dafb','Node.js':'#68a063','Database':'#336791','DevOps':'#ee4c2c','Other':'#7c6fff'};
+      catEl.innerHTML=usedCats.map(([cat,count])=>`
+        <div class="web-cat-progress">
+          <div class="web-cat-progress-label"><span>${cat}</span><span>${count} topic${count>1?'s':''}</span></div>
+          <div class="pt"><div class="pf" style="background:${CAT_COLORS[cat]||'var(--bl)'};width:${Math.round(count/maxCount*100)}%"></div></div>
+        </div>`).join('');
+    }
+  }
+
+  // Topic list with filter
+  const logEl=document.getElementById('web-log');
+  if(logEl){
+    const filtered=webCatFilter==='All'?S.webLog:S.webLog.filter(l=>(l.cat||'Other')===webCatFilter);
+    if(!filtered.length){logEl.innerHTML=`<div class="empty">No ${webCatFilter==='All'?'':webCatFilter+' '}topics yet</div>`;}
+    else{
+      const DIFF_CLS={Easy:'web-diff-easy',Medium:'web-diff-medium',Hard:'web-diff-hard'};
+      const CAT_COLORS={'HTML':'#e34c26','CSS':'#264de4','JavaScript':'#f7df1e','React':'#61dafb','Node.js':'#68a063','Database':'#336791','DevOps':'#ee4c2c','Other':'#7c6fff'};
+      logEl.innerHTML=filtered.map((l,i)=>{
+        const realIdx=S.webLog.indexOf(l);
+        return`<div class="web-topic-item">
+          <div class="web-topic-header">
+            <span class="web-topic-name">${l.topic}</span>
+            ${l.cat?`<span class="web-cat-badge" style="background:${CAT_COLORS[l.cat]||'var(--bl)'}22;color:${CAT_COLORS[l.cat]||'var(--bl)'};border:0.5px solid ${CAT_COLORS[l.cat]||'var(--bl)'}44">${l.cat}</span>`:''}
+            ${l.diff?`<span class="web-cat-badge ${DIFF_CLS[l.diff]||'web-diff-medium'}">${l.diff}</span>`:''}
+            <span class="tdel" onclick="delWebTopic(${realIdx})">✕</span>
+          </div>
+          <div class="web-topic-meta">
+            ${l.link?`<a href="${l.link}" target="_blank" class="web-topic-link">🔗 Resource</a>`:''}
+            <span class="web-topic-date">${fd(l.date)}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
 function addTask(){const v=document.getElementById('task-in').value.trim();if(!v)return;S.tasks.push({id:Date.now(),text:v,done:false});document.getElementById('task-in').value='';sv();render();toast('Task added!');}
 function toggleTask(id){const t=S.tasks.find(t=>t.id===id);if(!t)return;const wasDone=t.done;t.done=!t.done;if(!wasDone&&t.done){addXP(XP_PER_TASK,'Task completed');}if(S.tasks.length>0&&S.tasks.every(t=>t.done)){const s=upStr(S.taskLast,S.taskStr);S.taskStr=s.str;S.taskLast=s.last;S.bestStreak=Math.max(S.bestStreak||0,S.taskStr);toast('All tasks done! 🎉');}sv();render();checkAchievements();}
 function delTask(id){S.tasks=S.tasks.filter(t=>t.id!==id);sv();render();}
@@ -657,7 +850,7 @@ function render(){
   const wp=Math.min(100,Math.round(S.web/50*100));document.getElementById('h-web-b').style.width=wp+'%';document.getElementById('h-web-t').textContent=`${S.web} / 50`;
   document.getElementById('h-exl').innerHTML=up.length?up.slice(0,3).map(e=>exHTML(e)).join(''):'<div class="empty">No exams yet</div>';
   document.getElementById('web-b').style.width=wp+'%';document.getElementById('web-t').textContent=`${S.web} / 50`;document.getElementById('web-s').textContent=`🔥 ${S.webStr||0} days`;
-  document.getElementById('web-log').innerHTML=S.webLog.length?S.webLog.map(l=>`<div class="ti"><span class="tt">${l.topic}</span><span style="font-size:11px;color:var(--mu)">${fd(l.date)}</span></div>`).join(''):'<div class="empty">No topics yet</div>';
+  renderWebDev();
   document.getElementById('task-s').textContent=`🔥 ${S.taskStr||0} days`;
   document.getElementById('task-list').innerHTML=S.tasks.length?S.tasks.map(t=>`<div class="ti ${t.done?'done':''}" onclick="toggleTask(${t.id})"><div class="cbox">${t.done?'✓':''}</div><span class="tt">${t.text}</span><span style="font-size:10px;color:var(--am);margin-right:4px">${t.done?'':'+5XP'}</span><span class="tdel" onclick="event.stopPropagation();delTask(${t.id})">✕</span></div>`).join(''):'<div class="empty">No tasks yet</div>';
   document.getElementById('exam-list').innerHTML=up.length?up.map(e=>exHTML(e,true)).join(''):'<div class="empty">No exams yet</div>';
@@ -680,6 +873,7 @@ function go(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if(name==='dsa')renderDSA();
+  if(name==='web')renderWebDev();
   if(name==='stats')renderStats();
   if(name==='achievements')renderAchievements();
   if(name==='leetcode')renderLeetCode();
@@ -803,7 +997,7 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('user-av').textContent=initials;
     document.getElementById('s-uav').textContent=initials;
     await loadFromCloud();
-    render();renderDSA();renderStats();renderAchievements();
+    render();renderDSA();renderWebDev();renderStats();renderAchievements();
     if(S.lcUsername)setTimeout(syncLeetCode,2000);
     if(S.notif&&Notification.permission==='granted')schedNotif();
   }else{
